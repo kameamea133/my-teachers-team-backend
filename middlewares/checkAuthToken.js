@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 function chechAuth(req, res, next) {
-    const authToken = req.cokies.authToken;
+    const authToken = req.cookies.authToken;
     const refreshToken = req.cookies.refreshToken;
 
     if(!authToken || !refreshToken) {

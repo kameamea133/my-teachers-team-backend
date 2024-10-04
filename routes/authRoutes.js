@@ -167,18 +167,26 @@ router.post('/login', async (req, res , next) => {
             sameSite: "none"
         });
 
-    } catch (error) {
+        return responseFunction(res, 200, "User logged in successfully", {user, authToken, refreshToken}, true);
 
+    } catch (error) {
+        return responseFunction(res, 500, error.message, null, false);
     }
 })
 
 
 router.get('/checklogin', authTokenHandler, async (req, res, next) => {
-    res.json({
-        ok: req.ok,
-        message: req.message,
-        userId: req.userId
-    })
+    try {
+        res.json({
+            ok: req.ok,
+            message: req.message,
+            userId: req.userId
+        })
+
+    } catch (error) {
+        console.error("Error in /checklogin route", error);
+    res.status(500).json({ ok: false, message: "Internal Server Error" });
+    }
 })
 
 router.get('/getuser', authTokenHandler, async (req, res, next) => {
