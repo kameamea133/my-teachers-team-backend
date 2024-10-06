@@ -11,6 +11,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const authTokenHandler = require("../middlewares/checkAuthToken");
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const mailer = async (receiveremail, code)=>  {
     let transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -73,6 +75,7 @@ router.post('/sendotp', async (req, res, next) => {
 })
 
 router.post('/register', async (req, res, next) => {
+    
     const { name, email, password, role, otp } = req.body;
 
     if(!name || !email || !password || !role || !otp) {
@@ -137,6 +140,7 @@ router.post('/register', async (req, res, next) => {
 })
 
 router.post('/login', async (req, res , next) => {
+    
     try{
         const { email, password } = req.body;
         const user = await User.findOne({email});
@@ -157,13 +161,13 @@ router.post('/login', async (req, res , next) => {
 
         res.cookie("authToken", authToken, {
             httpOnly: true,
-            secure: true,
+            secure: isProduction,
             sameSite: "none"
         });
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: true,
+            secure: isProduction,
             sameSite: "none"
         });
 
@@ -204,8 +208,19 @@ router.get('/getuser', authTokenHandler, async (req, res, next) => {
 })
 
 router.get('/logout', authTokenHandler,  async (req, res, next) => {
-    res.clearCookie("authToken");
-    res.clearCookie("refreshToken");
+
+    res.clearCookie("authToken", {
+        path: '/',
+        httpOnly: true,
+        secure: isProduction, 
+        sameSite: 'none'
+    });
+    res.clearCookie("refreshToken", {
+        path: '/',
+        httpOnly: true,
+        secure: isProduction, 
+        sameSite: 'none'
+    });
 
     res.json({
         ok: true,
