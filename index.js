@@ -26,19 +26,22 @@ app.use(
 )
 
 app.use(bodyParser.json());
+
+
+const isProduction = process.env.NODE_ENV === 'production';
 app.use(cookieParser({
     httpOnly: true,
-    secure: true,
+    secure: isProduction,
     sameSite: "none",
     maxage: 1000 * 60 * 60 * 24 * 7,
     signed: true,
 }));
 
 const authRoutes = require("./routes/authRoutes");
-// const classroomRoutes = require("./routes/classroomRoutes");
+const classroomRoutes = require("./routes/classroomRoutes");
 
 app.use("/auth", authRoutes);
-// app.use("/class", classroomRoutes);
+app.use("/class", classroomRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello World!");

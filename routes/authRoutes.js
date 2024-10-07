@@ -11,7 +11,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const authTokenHandler = require("../middlewares/checkAuthToken");
 
-const isProduction = process.env.NODE_ENV === 'production';
+
 
 const mailer = async (receiveremail, code)=>  {
     let transporter = nodemailer.createTransport({
@@ -118,17 +118,22 @@ router.post('/register', async (req, res, next) => {
 
         const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET_KEY, {
             expiresIn: "10d"});
+
+            const isProduction = process.env.NODE_ENV === 'production';
+
         
         res.cookie("authToken", authToken, {
             httpOnly: true,
-            secure: true,
-            sameSite: "none"
+            secure: isProduction,
+            sameSite: "none",
+            path: '/'
         });
         
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: true,
-            sameSite: "none"
+            secure: isProduction,
+            sameSite: "none",
+            path: '/'
         })
 
         user.password = undefined;
@@ -158,17 +163,21 @@ router.post('/login', async (req, res , next) => {
         const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET_KEY, {expiresIn: "10d"});
 
         user.password = undefined;
+        const isProduction = process.env.NODE_ENV === 'production';
+
 
         res.cookie("authToken", authToken, {
             httpOnly: true,
             secure: isProduction,
-            sameSite: "none"
+            sameSite: "none",
+            path: '/'
         });
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: isProduction,
-            sameSite: "none"
+            sameSite: "none",
+            path: '/'
         });
 
         return responseFunction(res, 200, "User logged in successfully", {user, authToken, refreshToken}, true);
@@ -194,6 +203,7 @@ router.get('/checklogin', authTokenHandler, async (req, res, next) => {
 })
 
 router.get('/getuser', authTokenHandler, async (req, res, next) => {
+    console.log('Cookies in the request:', req.cookies);
     try {
         const user = await User.findById(req.userId).select("-password");
 
@@ -208,6 +218,8 @@ router.get('/getuser', authTokenHandler, async (req, res, next) => {
 })
 
 router.get('/logout', authTokenHandler,  async (req, res, next) => {
+
+    const isProduction = process.env.NODE_ENV === 'production';
 
     res.clearCookie("authToken", {
         path: '/',

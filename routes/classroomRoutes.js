@@ -23,7 +23,7 @@ router.post('/create', authTokenHandler, async (req, res) => {
     }
 })
 
-router.get('/classroomcreatedbyme', authTokenHandler, async (req, res) => {
+router.get('/classroomscreatedbyme', authTokenHandler, async (req, res) => {
     try {
         const classrooms = await Classroom.find({owner: req.userId});
         return responseFunction(res, 200, "Classrooms found", classrooms, true);
@@ -31,3 +31,5 @@ router.get('/classroomcreatedbyme', authTokenHandler, async (req, res) => {
         return responseFunction(res, 500, error.message, null, false);
     }
 })
+
+module.exports = router;
